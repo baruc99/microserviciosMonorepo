@@ -27,50 +27,44 @@ import com.paymentchain.product.respository.ProductRepository;
 @RestController
 @RequestMapping("/product")
 public class ProductRestController {
-    
+
     @Autowired
-    ProductRepository customerRepository;
-    
+    ProductRepository productRepository;
+
     @GetMapping()
     public List<Product> list() {
-        return customerRepository.findAll();
+        return productRepository.findAll();
     }
-    
+
     @GetMapping("/{id}")
-    public ResponseEntity<?> get(@PathVariable long id) {
-         Optional<Product> customer = customerRepository.findById(id);
-        if (customer.isPresent()) {
-            return new ResponseEntity<>(customer.get(), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    public Product get(@PathVariable("id") long id) {
+        return productRepository.findById(id).get();
     }
-    
+
     @PutMapping("/{id}")
-    public ResponseEntity<?> put(@PathVariable long id, @RequestBody Product input) {
-         Optional<Product> optionalcustomer = customerRepository.findById(id);
-        if (optionalcustomer.isPresent()) {
-            Product newcustomer = optionalcustomer.get();
-            newcustomer.setName(input.getName());
-            newcustomer.setCode(input.getCode());
-             Product save = customerRepository.save(newcustomer);
-          return new ResponseEntity<>(save, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> put(@PathVariable("id") long id, @RequestBody Product input) {
+        Product find = productRepository.findById(id).get();
+        if (find != null) {
+            find.setCode(input.getCode());
+            find.setName(input.getName());
         }
-    }
-    
-    @PostMapping
-    public ResponseEntity<?> post(@RequestBody Product input) {
-        Product save = customerRepository.save(input);
+        Product save = productRepository.save(find);
         return ResponseEntity.ok(save);
     }
-    
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable long id) {
-         customerRepository.deleteById(id);
-         return new ResponseEntity<>(HttpStatus.OK);
-    }
-    
-}
 
+    @PostMapping
+    public ResponseEntity<?> post(@RequestBody Product input) {
+        Product save = productRepository.save(input);
+        return ResponseEntity.ok(save);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable("id") long id) {  
+        Optional<Product> findById = productRepository.findById(id);   
+        if(findById.get() != null){               
+                  productRepository.delete(findById.get());  
+        }
+        return ResponseEntity.ok().build();
+    }
+
+}
